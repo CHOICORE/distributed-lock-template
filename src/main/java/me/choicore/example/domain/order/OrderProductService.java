@@ -23,7 +23,7 @@ public class OrderProductService {
             OrderSheet orderSheet = new OrderSheet(products);
             // ...
             throw new OrderProcessingException("주문 처리 중 오류가 발생했습니다. 주문을 취소합니다.");
-        } catch (RuntimeException e) {
+        } catch (OrderProcessingException e) {
             orderProductOperations.restock(orderForm.getOrderProducts());
             throw e;
         }
