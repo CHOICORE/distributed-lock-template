@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: core-db
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=core'
+      - 'POSTGRES_USER=local'
+      - 'POSTGRES_PASSWORD=secret'
+    ports:
+      - '5432:5432'
+  redis:
+    container_name: cache-db
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'
+    command: redis-server --port 6379
+    labels:
+      - 'name=redis'
+      - 'mode=standalone'

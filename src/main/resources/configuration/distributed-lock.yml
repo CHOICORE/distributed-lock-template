@@ -1,0 +1,4 @@
+distributed-lock:
+  lease-time: 3
+  wait-time: 5
+  time-unit: seconds
