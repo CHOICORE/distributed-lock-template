@@ -1,0 +1,23 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+    import:
+      - classpath:configuration/distributed-lock.yml
+      - classpath:configuration/cache-redis.yml
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/core
+    username: local
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
