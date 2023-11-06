@@ -10,8 +10,4 @@ public record DistributedLockProperties(
         long waitTime,
         TimeUnit timeUnit
 ) {
-
-    public DistributedLockProperties() {
-        this(30, 10, TimeUnit.SECONDS);
-    }
 }

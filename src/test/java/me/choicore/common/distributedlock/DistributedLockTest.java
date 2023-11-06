@@ -9,6 +9,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = {ProductTestDataLoader.class})
@@ -31,13 +35,46 @@ class DistributedLockTest {
     @Test
     @DisplayName("잠금을 획득하고 메서드를 실행한 후 잠금을 해제한다.")
     void t2() {
+        
         String lockKey = "LOCK_KEY";
-        distributedLockTemplate.setKey(lockKey);
+
         Assertions.assertThatNoException().isThrownBy(
-                () -> distributedLockTemplate.execute(() -> {
-                    Assertions.assertThat(distributedLockTemplate.getKey()).isEqualTo(lockKey);
-                    Assertions.assertThat(distributedLockTemplate.getDistributedLock().isLocked()).isTrue();
-                }));
+                () -> distributedLockTemplate
+                        .key(lockKey)
+                        .execute(() -> {
+                            System.out.println("logic");
+                            Assertions.assertThat(distributedLockTemplate.getKey()).isEqualTo(lockKey);
+                            Assertions.assertThat(distributedLockTemplate.getDistributedLock().isLocked()).isTrue();
+                        }));
         Assertions.assertThat(distributedLockTemplate.getDistributedLock().isLocked()).isFalse();
+    }
+
+    @Test
+    @DisplayName("트랜잭션 내에서 잠금을 획득하고 메서드를 실행한 후 잠금을 해제한다.")
+    void t3() throws InterruptedException {
+
+        var numberOfThreads = 20;
+
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+
+        CountDownLatch countDownLatch = new CountDownLatch(numberOfThreads);
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            executorService.submit(() -> {
+                try {
+                    distributedLockTemplate
+                            .key("LOCK_KEY" + "-" + Thread.currentThread().getName())
+                            .waitTime(2)
+                            .leaseTime(3)
+                            .withInTransaction(true)
+                            .execute(() -> System.out.println("hello"));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+        countDownLatch.await();
     }
 }

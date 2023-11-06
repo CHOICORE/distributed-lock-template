@@ -38,7 +38,7 @@ public final class DistributedLockTemplate extends DefaultDistributedLockDefinit
         try {
             this.validateTryAcquireLock(rLock);
 
-            log.info("[Thread:{}] <{}> lock acquired with in transaction : {}", Thread.currentThread().threadId(), rLock.getName(), withInTransactional);
+            log.info("[Thread:{}] {} lock acquired with in transaction : {}", Thread.currentThread().threadId(), rLock.getName(), withInTransactional);
 
             return executeSupplier(supplier);
 
@@ -63,6 +63,9 @@ public final class DistributedLockTemplate extends DefaultDistributedLockDefinit
             }
 
             String lockNames = Arrays.stream(rLocks).map(RLock::getName).collect(Collectors.joining(", "));
+
+            log.info("[Thread:{}] {} lock acquired with in transaction : {}", Thread.currentThread().threadId(), lockNames, withInTransactional);
+
             return executeSupplier(supplier);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -140,7 +143,7 @@ public final class DistributedLockTemplate extends DefaultDistributedLockDefinit
         if (lock.isLocked() && lock.isHeldByCurrentThread()) {
             try {
                 lock.unlock();
-                log.info("[Thread:{}] <{}> lock released", Thread.currentThread().threadId(), lock.getName());
+                log.info("[Thread:{}] {} lock released", Thread.currentThread().threadId(), lock.getName());
             } catch (Throwable e) {
                 log.error("Failed to release lock", e);
             }
