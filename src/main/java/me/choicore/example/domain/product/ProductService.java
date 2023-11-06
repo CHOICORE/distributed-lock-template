@@ -40,7 +40,7 @@ public class ProductService implements OrderProductOperations {
 
     @Override
     @DistributedLock(prefix = LOCK_NAME_PREFIX, key = "#productId")
-    public void consumeStock(Long productId, int quantity) {
+    public void consumeStock(final Long productId, final int quantity) {
         Product product = findProductById(productId);
         product.decreaseStock(quantity);
     }
