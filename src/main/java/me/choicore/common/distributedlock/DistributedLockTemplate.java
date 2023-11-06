@@ -131,7 +131,7 @@ public final class DistributedLockTemplate extends DefaultDistributedLockDefinit
     }
 
     private void validateKey() {
-        if (this.getKey().isBlank()) {
+        if (this.getKey() == null || this.getKey().isBlank()) {
             throw new IllegalArgumentException("Lock key is blank");
         }
     }
